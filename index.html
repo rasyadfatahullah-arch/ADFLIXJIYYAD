@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AD FLIX - JIYYAD TOOLS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; }
+  body { background: #141414; color: #fff; overflow-x: hidden; }
+
+  /* HEADER */
+  header {
+    position: fixed; top: 0; width: 100%; padding: 18px 50px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100; transition: background 0.4s;
+    background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+  }
+  header.scrolled { background: #141414; }
+  .logo {
+    font-size: 32px; font-weight: 900; letter-spacing: 2px;
+    color: #e50914; text-shadow: 0 0 10px rgba(229,9,20,0.5);
+    cursor: pointer;
+  }
+  .logo span { color: #fff; font-size: 14px; display: block; letter-spacing: 4px; margin-top: -6px; font-weight: 400; opacity: 0.7; }
+  nav ul { display: flex; list-style: none; gap: 22px; }
+  nav ul li { cursor: pointer; font-size: 14px; transition: color 0.2s; }
+  nav ul li:hover { color: #b3b3b3; }
+
+  /* SEARCH BAR */
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,0,0,0.6); border: 1px solid #444;
+    border-radius: 6px; padding: 6px 12px; transition: all 0.3s;
+  }
+  .search-box:focus-within { border-color: #e50914; background: rgba(0,0,0,0.9); }
+  .search-box input {
+    background: transparent; border: none; color: #fff;
+    outline: none; width: 160px; font-size: 13px;
+  }
+  .search-box input::placeholder { color: #888; }
+
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .owner-badge {
+    background: linear-gradient(135deg, #e50914, #8b0000);
+    padding: 6px 14px; border-radius: 20px; font-size: 11px;
+    font-weight: bold; letter-spacing: 1px;
+  }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 6px;
+    background: linear-gradient(135deg, #f39c12, #e74c3c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 14px; cursor: pointer;
+  }
+
+  /* HERO */
+  .hero {
+    height: 85vh; position: relative; display: flex; align-items: center; padding: 0 60px;
+    background: #141414;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center top;
+    transition: background-image 0.5s;
+  }
+  .hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(20,20,20,0.95) 30%, rgba(20,20,20,0.3) 70%, rgba(20,20,20,0.9) 100%),
+                linear-gradient(0deg, #141414 0%, transparent 40%);
+  }
+  .hero-content { max-width: 620px; z-index: 2; }
+  .hero-tag { color: #e50914; font-weight: bold; font-size: 13px; letter-spacing: 3px; margin-bottom: 12px; }
+  .hero-title { font-size: 64px; font-weight: 900; line-height: 1.1; margin-bottom: 18px; text-shadow: 2px 2px 20px rgba(0,0,0,0.8); }
+  .hero-meta { display: flex; gap: 14px; font-size: 14px; margin-bottom: 16px; color: #ccc; flex-wrap: wrap; }
+  .hero-meta .match { color: #46d369; font-weight: bold; }
+  .hero-desc { font-size: 16px; line-height: 1.5; margin-bottom: 26px; color: #e5e5e5; text-shadow: 1px 1px 4px rgba(0,0,0,0.7); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero-buttons { display: flex; gap: 14px; }
+  .btn {
+    padding: 12px 28px; border-radius: 6px; border: none;
+    font-size: 15px; font-weight: bold; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+  }
+  .btn-play { background: #fff; color: #000; }
+  .btn-play:hover { background: #e6e6e6; transform: scale(1.03); }
+  .btn-info { background: rgba(109,109,110,0.7); color: #fff; }
+  .btn-info:hover { background: rgba(109,109,110,0.9); }
+
+  /* ROWS */
+  .row { padding: 0 60px; margin-bottom: 40px; }
+  .row h2 { font-size: 22px; margin-bottom: 14px; font-weight: 600; }
+  .row-posters {
+    display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px;
+    scrollbar-width: none;
+  }
+  .row-posters::-webkit-scrollbar { display: none; }
+  .poster {
+    min-width: 240px; height: 135px; border-radius: 6px; cursor: pointer;
+    position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;
+    background: #222; flex-shrink: 0;
+  }
+  .poster img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .poster:hover { transform: scale(1.08); z-index: 10; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+  .poster:hover img { transform: scale(1.1); }
+  .poster-overlay {
+    position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 60%);
+    display: flex; align-items: flex-end; padding: 10px; opacity: 0; transition: opacity 0.3s;
+  }
+  .poster:hover .poster-overlay { opacity: 1; }
+  .poster-title { font-size: 13px; font-weight: bold; }
+  .poster .play-icon {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 44px; height: 44px; border-radius: 50%; background: rgba(229,9,20,0.9);
+    display: flex; align-items: center; justify-content: center; opacity: 0;
+    transition: opacity 0.3s; font-size: 18px;
+  }
+  .poster:hover .play-icon { opacity: 1; }
+  .poster .rating-badge {
+    position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8);
+    color: #46d369; font-size: 11px; font-weight: bold;
+    padding: 3px 8px; border-radius: 4px;
+  }
+
+  /* SKELETON LOADING */
+  .skeleton {
+    min-width: 240px; height: 135px; border-radius: 6px; flex-shrink: 0;
+    background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* MODAL PLAYER */
+  .modal {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+    padding: 40px; animation: fadeIn 0.3s;
+  }
+  .modal.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-content {
+    width: 100%; max-width: 1000px; background: #000;
+    border-radius: 10px; overflow: hidden; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+  }
+  .modal-video { width: 100%; aspect-ratio: 16/9; background: #000; }
+  .modal-video iframe, .modal-video video { width: 100%; height: 100%; border: none; }
+  .modal-info { padding: 20px 26px; background: #181818; }
+  .modal-info h3 { font-size: 26px; margin-bottom: 10px; }
+  .modal-info .meta { color: #46d369; font-size: 13px; margin-bottom: 10px; font-weight: bold; }
+  .modal-info p { color: #b3b3b3; font-size: 14px; line-height: 1.5; }
+  .modal-loading {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.85); color: #fff; font-size: 16px; z-index: 5;
+  }
+  .spinner {
+    width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #e50914; border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin-right: 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .close-btn {
+    position: absolute; top: 12px; right: 16px; z-index: 10;
+    width: 40px; height: 40px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.7); color: #fff; font-size: 22px;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .close-btn:hover { background: #e50914; }
+
+  /* NOTIF */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: #e50914; color: #fff; padding: 14px 28px; border-radius: 8px;
+    font-weight: bold; z-index: 2000; transition: transform 0.4s; opacity: 0;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* FOOTER */
+  footer {
+    padding: 50px 60px; border-top: 1px solid #333;
+    color: #808080; font-size: 13px; text-align: center;
+  }
+  footer .brand { color: #e50914; font-weight: bold; font-size: 15px; }
+  footer .owner { color: #fff; margin-top: 6px; }
+
+  @media (max-width: 768px) {
+    header { padding: 14px 20px; }
+    nav { display: none; }
+    .search-box input { width: 100px; }
+    .hero { padding: 0 24px; height: 70vh; }
+    .hero-title { font-size: 38px; }
+    .hero-desc { font-size: 14px; }
+    .row { padding: 0 20px; }
+    .poster, .skeleton { min-width: 160px; height: 90px; }
+    .modal { padding: 12px; }
+    .owner-badge { font-size: 9px; padding: 4px 8px; }
+    .logo { font-size: 24px; }
+    .header-right { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header id="header">
+  <div class="logo" onclick="location.reload()">AD FLIX<span>JIYYAD TOOLS</span></div>
+  <nav>
+    <ul>
+      <li onclick="window.scrollTo(0,0)">Beranda</li>
+      <li onclick="document.getElementById('rowTV').scrollIntoView({behavior:'smooth'})">Serial TV</li>
+      <li onclick="document.getElementById('rowMovie').scrollIntoView({behavior:'smooth'})">Film</li>
+      <li onclick="document.getElementById('rowTrending').scrollIntoView({behavior:'smooth'})">Trending</li>
+    </ul>
+  </nav>
+  <div class="header-right">
+    <div class="search-box">
+      <span style="color:#888;">🔍</span>
+      <input type="text" id="searchInput" placeholder="Cari film..." onkeypress="if(event.key==='Enter') doSearch()">
+    </div>
+    <div class="owner-badge">OWNER: JIYYAD TOOLS</div>
+    <div class="avatar">J</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" id="heroBg" style="background-image:url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1600')"></div>
+  <div class="hero-content">
+    <div class="hero-tag">AD FLIX ORIGINAL</div>
+    <h1 class="hero-title" id="heroTitle">Memuat...</h1>
+    <div class="hero-meta" id="heroMeta"></div>
+    <p class="hero-desc" id="heroDesc">Sedang mengambil data dari API...</p>
+    <div class="hero-buttons">
+      <button class="btn btn-play" onclick="playHero()">▶ Putar Trailer</button>
+      <button class="btn btn-info" onclick="showHeroInfo()">ℹ Info Selengkapnya</button>
+    </div>
+  </div>
+</section>
+
+<!-- ROWS -->
+<div class="row">
+  <h2>🔥 Sedang Tren di AD FLIX</h2>
+  <div class="row-posters" id="rowTrending">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>🎬 Film Populer</h2>
+  <div class="row-posters" id="rowMovie">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>📺 Serial TV Populer</h2>
+  <div class="row-posters" id="rowTV">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="row" id="searchRow" style="display:none;">
+  <h2>🔍 Hasil Pencarian</h2>
+  <div class="row-posters" id="rowSearch"></div>
+</div>
+
+<footer>
+  <div class="brand">AD FLIX</div>
+  <div class="owner">© 2024 AD FLIX — Dimiliki oleh JIYYAD TOOLS</div>
+  <div style="margin-top:8px;">Data film dari TMDB API • Trailer dari YouTube</div>
+</footer>
+
+<!-- MODAL PLAYER -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-video" id="modalVideo"></div>
+    <div class="modal-info">
+      <h3 id="modalTitle">Judul</h3>
+      <div class="meta" id="modalMeta"></div>
+      <p id="modalDesc"></p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Notifikasi</div>
+
+<script>
+/* ================================================
+   KONFIGURASI API (SUDAH DIISI DENGAN API KEY KAMU)
+   ================================================ */
+const CONFIG = {
+  TMDB_API_KEY: 'dd11a47dcb98036b5c6f2c8fbb831e92', // API Key kamu
+  BASE_URL: 'https://api.themoviedb.org/3',
+  IMG_BASE: 'https://image.tmdb.org/t/p/w500',
+  IMG_ORIG: 'https://image.tmdb.org/t/p/original',
+  YT_BASE: 'https://www.youtube.com/embed/',
+  LANG: 'id-ID'
+};
+
+let heroMovie = null;
+
+/* ================================================
+   UTIL: Fetch API
+   ================================================ */
+async function apiFetch(endpoint, params = {}) {
+  const url = new URL(CONFIG.BASE_URL + endpoint);
+  url.searchParams.append('api_key', CONFIG.TMDB_API_KEY);
+  url.searchParams.append('language', CONFIG.LANG);
+  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('API Error: ' + res.status);
+  return res.json();
+}
+
+/* ================================================
+   LOAD DATA
+   ================================================ */
+async function loadTrending() {
+  try {
+    const data = await apiFetch('/trending/all/week');
+    renderRow('rowTrending', data.results.slice(0, 12));
+    // Ambil satu film dengan backdrop bagus untuk Hero Banner
+    const hero = data.results.find(m => m.backdrop_path && m.overview) || data.results[0];
+    setHero(hero);
+  } catch (err) {
+    console.error(err);
+    showToast('⚠️ Gagal memuat data API: ' + err.message);
+  }
+}
+
+async function loadMovies() {
+  try {
+    const data = await apiFetch('/movie/popular');
+    renderRow('rowMovie', data.results.slice(0, 12));
+  } catch (err) { console.error(err); }
+}
+
+async function loadTV() {
+  try {
+    const data = await apiFetch('/tv/popular');
+    renderRow('rowTV', data.results.slice(0, 12));
+  } catch (err) { console.error(err); }
+}
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  
+  const row = document.getElementById('searchRow');
+  row.style.display = 'block';
+  row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('rowSearch').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+
+  try {
+    const data = await apiFetch('/search/multi', { query: q });
+    const results = data.results.filter(r => r.media_type !== 'person' && (r.poster_path || r.backdrop_path));
+    
+    if (results.length === 0) {
+      document.getElementById('rowSearch').innerHTML = '<p style="color:#888; padding: 20px;">Tidak ada hasil untuk "' + q + '"</p>';
+      return;
+    }
+    renderRow('rowSearch', results.slice(0, 12));
+  } catch (err) {
+    showToast('⚠️ Pencarian gagal: ' + err.message);
+  }
+}
+
+/* ================================================
+   RENDER ROW
+   ================================================ */
+function renderRow(containerId, movies) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  
+  movies.forEach(m => {
+    const title = m.title || m.name || 'Untitled';
+    // Prioritaskan backdrop (landscape) untuk tampilan row, jika tidak ada pakai poster (portrait)
+    const imgPath = m.backdrop_path || m.poster_path;
+    const img = imgPath ? CONFIG.IMG_BASE + imgPath : 'https://via.placeholder.com/300x170/222/666?text=No+Image';
+    const rating = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
+
+    const div = document.createElement('div');
+    div.className = 'poster';
+    div.onclick = () => openDetails(m);
+    div.innerHTML = `
+      <img src="${img}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x170/222/666?text=No+Image'">
+      <div class="rating-badge">⭐ ${rating}</div>
+      <div class="play-icon">▶</div>
+      <div class="poster-overlay"><span class="poster-title">${title}</span></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ================================================
+   HERO BANNER SETUP
+   ================================================ */
+function setHero(movie) {
+  heroMovie = movie;
+  const title = movie.title || movie.name || 'AD FLIX Original';
+  const overview = movie.overview || 'Nikmati film dan serial terbaik hanya di AD FLIX.';
+  const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+  const year = (movie.release_date || movie.first_air_date || '').slice(0, 4) || '2024';
+  const type = movie.media_type === 'tv' || movie.first_air_date ? 'Serial TV' : 'Film';
+
+  if (movie.backdrop_path) {
+    document.getElementById('heroBg').style.backgroundImage = `url('${CONFIG.IMG_ORIG + movie.backdrop_path}')`;
+  }
+  
+  document.getElementById('heroTitle').textContent = title;
+  document.getElementById('heroMeta').innerHTML = `
+    <span class="match">⭐ ${rating}</span>
+    <span>${year}</span>
+    <span>${type}</span>
+    <span>HD</span>
+  `;
+  document.getElementById('heroDesc').textContent = overview;
+}
+
+function playHero() { if (heroMovie) openDetails(heroMovie); }
+function showHeroInfo() { if (heroMovie) openDetails(heroMovie); }
+
+/* ================================================
+   MODAL DETAILS & PLAYER (TRAILER YOUTUBE)
+   ================================================ */
+async function openDetails(movie) {
+  const modal = document.getElementById('modal');
+  const videoContainer = document.getElementById('modalVideo');
+  const title = document.getElementById('modalTitle');
+  const meta = document.getElementById('modalMeta');
+  const desc = document.getElementById('modalDesc');
+
+  const movieTitle = movie.title || movie.name || 'Untitled';
+  const movieType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie');
+
+  title.textContent = movieTitle;
+  meta.innerHTML = `⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'} • ${(movie.release_date || movie.first_air_date || '').slice(0,4) || '2024'} • ${movieType === 'tv' ? 'Serial TV' : 'Film'}`;
+  desc.textContent = movie.overview || 'Deskripsi tidak tersedia.';
+  
+  videoContainer.innerHTML = `
+    <div class="modal-loading">
+      <div class="spinner"></div> Mencari trailer di YouTube...
+    </div>
+  `;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    // Minta data video (trailer) ke TMDB
+    const endpoint = `/${movieType}/${movie.id}/videos`;
+    const data = await apiFetch(endpoint);
+    
+    // Cari video yang tipenya 'Trailer' dan dari 'YouTube'
+    const trailer = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer')
+                 || data.results.find(v => v.site === 'YouTube');
+
+    if (trailer) {
+      videoContainer.innerHTML = `
+        <iframe src="${CONFIG.YT_BASE}${trailer.key}?autoplay=1&rel=0"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen></iframe>
+      `;
+    } else {
+      // Jika film tidak punya trailer YouTube, putar video sample
+      videoContainer.innerHTML = `
+        <video controls autoplay playsinline>
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+      `;
+      showToast('ℹ️ Trailer tidak tersedia, memutar video sample');
+    }
+  } catch (err) {
+    console.error(err);
+    videoContainer.innerHTML = `<div style="padding: 40px; text-align: center;">Gagal memuat trailer.</div>`;
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  document.getElementById('modalVideo').innerHTML = '';
+  document.body.style.overflow = 'auto';
+}
+
+/* ================================================
+   UI HELPERS
+   ================================================ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Scroll effect
+window.addEventListener('scroll', () => {
+  const header = document.getElementById('header');
+  if (window.scrollY > 50) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+});
+
+// Close modal on background click / ESC
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ================================================
+   INIT (JALANKAN SAAT HALAMAN DIBUKA)
+   ================================================ */
+loadTrending();
+loadMovies();
+loadTV();
+
+</script>
+</body>
+</html>
